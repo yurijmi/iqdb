@@ -74,7 +74,6 @@ or when sending the ```done``` or ```quit``` commands.
 DO NOT interrupt the program with Ctrl-C or similar until the database
 is closed or it may become corrupted.
 
-
 ### Server mode
 
 In query server mode, iqdb loads the databases into memory in read-only mode
@@ -216,6 +215,19 @@ The server has the following possible responses:
 		unreadable image file)
 	302 <exception> <description>
 		Fatal error message (e.g. corrupted database)
+```
+
+### Server mode with init.d script
+
+Edit [iqdb_init](iqdb_init.sh) script for your liking and run this:
+
+```
+sudo mv iqdb_init.sh /etc/init.d/
+sudo chown root:root /etc/init.d/iqdb_init.sh
+sudo chmod +x /etc/init.d/iqdb_init.sh
+sudo mkdir /usr/local/iqdb
+sudo update-rc.d iqdb_init.sh defaults
+/etc/init.d/iqdb_init.sh start
 ```
 
 ## Querying
