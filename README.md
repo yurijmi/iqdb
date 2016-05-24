@@ -1,19 +1,18 @@
-iqdb - Image Query Database system
+# iqdb - Image Query Database system
 piespy@gmail.com
 
 Distributed under the terms of the GNU General Public License,
 see the file COPYING for details.
 
-1) Compiling
+## Compiling
 
-- install either the libGD+libpng+libjpeg, or the ImageMagick dev package
-  Using GD, on Debian: libgd2-xpm-dev libpng12-dev libjpeg62-dev
-  Using ImageMagick, on Debian: libmagick9-dev, on Fedora: ImageMagick-devel)
-- check the top of the Makefile for settings
-- run make
-- if it fails, fix the Makefile or something
+```
+sudo apt-get install libgd-dev
+make
+make install
+```
 
-2) Running
+## Running
 
 The iqdb program has two operating modes: database maintenance and query server.
 
@@ -21,14 +20,17 @@ The maintenance mode is to update image databases: add and remove images, set
 image properties and retrieve database stats. The query server mode listens on
 a TCP port for query commands and returns matching image IDs.
 
-a) Maintenance
+### Maintenance
 
 Two major modes of calling the maintenance mode:
 
-$ iqdb add foo.db
+```$ iqdb add foo.db```
 
 This mode expects a list of image IDs and filenames on stdin, in this format:
+
+```
 	<ID> [<width> <height>]:<filename>
+```
 
 The ID is the image ID in hexadecimal. If width and height are not specified,
 the values from the filename are used instead. The filename can be any image
@@ -40,12 +42,13 @@ keeping track of that. It refers to an image exclusively by the ID.
 A more complex mode allows add, removing, updating and querying images for
 multiple databases at once:
 
-$ iqdb command foo.db bar.db baz.db
+```$ iqdb command foo.db bar.db baz.db```
 
-This mode expects commands on stdin. For a full list see do_commands() in
-iqdb.cpp. The <dbid> argument refers to the database on the command line, with
-the first argument being dbid=0. Commands of particular interest are:
+This mode expects commands on stdin. For a full list see ```do_commands()``` in
+iqdb.cpp. The ```<dbid>``` argument refers to the database on the command line, with
+the first argument being ```dbid=0```. Commands of particular interest are:
 
+```
 	add <dbid> <imgid> [<width> <height>]:<filename>
 		See above.
 	remove <dbid> <imgid>
@@ -60,48 +63,50 @@ the first argument being dbid=0. Commands of particular interest are:
 		Quit and save all databases to their original file.
 	quit
 		Quit and save all databases to their original file.
+```
 
 The maintenance commands (see listen mode below) are also supported in
 command mode, but perhaps not very useful here.
 
 Changes are automatically saved in the original file upon EOF on stdin,
-or when sending the "done" or "quit" commands.
+or when sending the ```done``` or ```quit``` commands.
 
 DO NOT interrupt the program with Ctrl-C or similar until the database
 is closed or it may become corrupted.
 
 
-b) Server mode
+### Server mode
 
 In query server mode, iqdb loads the databases into memory in read-only mode
 to allow the fastest image queries. No database modifications are possible.
 
-$ iqdb listen [IP:]port [-r] [-d=<debuglevel>] [-s<IP/host>...] foo.db bar.db baz.db
+```$ iqdb listen [IP:]port [-r] [-d=<debuglevel>] [-s<IP/host>...] foo.db bar.db baz.db```
 
 Listens on the given IP:port (default localhost if no IP given) for commands,
-after loading the given databases. If -r is specified and the port is
+after loading the given databases. If ```-r``` is specified and the port is
 currently in use by another instance of iqdb, it will load the database and
 then terminate that instance, to reduce the downtime while loading the
 databases (and to leave the old server running in the rare case that it
-should crash while starting up). The debug level may be set with -d.
-The -s option allows limiting iqdb queries to the given source IPs. This
+should crash while starting up). The debug level may be set with ```-d```.
+The ```-s``` option allows limiting iqdb queries to the given source IPs. This
 is useful if you cannot bind iqdb to localhost, for instance because the
 query script and iqdb run on different hosts. Then you can limit iqdb
 requests to the host where the script is running. Note that you should
-probably also specify "-s<host-IP>" with the IP as given to the listen
+probably also specify ```-s<host-IP>``` with the IP as given to the listen
 argument, to allow requests from the local host, for instance to add images
-to the database and to make the -r option work.
+to the database and to make the ```-r``` option work.
 
-$ iqdb listen2 [IP:]port [options...] foo.db bar.db baz.db
+```$ iqdb listen2 [IP:]port [options...] foo.db bar.db baz.db```
 
 Same as above, but listens on the given port and one port below it (i.e.
 if port 5588 is specified, also listens on 5587). The lower port is higher
 priority and all pending requests are serviced before the other port.
 
-To end a request, send the "done" command.
+To end a request, send the ```done``` command.
 
 Of particular interest are the following commands:
 
+```
 	query <dbid> <flags> <numres> <filename>
 		Find numres images most similar to given filename. If the
 		filename starts with ':', use e.g. "./filename" to disambiguate
@@ -150,8 +155,9 @@ Of particular interest are the following commands:
 			Return only results that are the given standard deviation
 			above the noise level. Nothing is returned if there are
 			no relevant results at all.
+```
 
-The "add" and "remove" commands are now supported as well, however they
+The ```add``` and ```remove``` commands are now supported as well, however they
 only modify the memory representation of the DB and cannot be saved back
 to disk later. They allow you to update the server without restarting it
 but require that you also update the DB file directly.
@@ -160,6 +166,7 @@ Additionally, since version 20081123 the listen mode also supports DB
 maintenance commands. In two-port mode these will only be accepted on
 the lower (high-priority) port.
 
+```
 	load <dbid> <mode> <filename>
 		Loads the given DB file into the given dbid (which must not
 		be in use yet). The mode can be one of the following:
@@ -182,9 +189,11 @@ the lower (high-priority) port.
 
 	db_list
 		Lists all loaded databases with dbid and filename.
+```
 
 The server has the following possible responses:
 
+```
 	000 iqdb ready
 		Displayed whenever iqdb is ready to
 		accept a command.
@@ -207,13 +216,14 @@ The server has the following possible responses:
 		unreadable image file)
 	302 <exception> <description>
 		Fatal error message (e.g. corrupted database)
+```
 
-3) Querying
+## Querying
 
-The file iqdb.php holds sample PHP code to connect to a running iqdb server
+The folder [web](web) holds sample PHP code to connect to a running iqdb server
 and queries it for similar images.
 
-4) Converting
+## Converting
 
 Since version 20090612, iqdb will automatically detect the integer sizes
 used for writing a given image database. It will automatically convert them
@@ -227,11 +237,15 @@ It is possible, but not recommended however, to have iqdb convert an image
 database of an older version into this new platform-independent format. It's
 better to rebuild the database from scratch. If you do want to convert the
 database, first make a backup of it, in case the conversion should fail.
-Then run "iqdb rehash <db-file>".
+Then run ```iqdb rehash <db-file>```.
 
 If you haven't turned off debugging, this should output the following:
+
+```
 	Loading db (converting data sizes)...
 	Database loaded from <db-file>, has <num> images.
+```
+
 After loading, it will save the database again in the platform-independent
 format. Pay particular attention to the number of images it reports. If
 this isn't the number you expect, the conversion probably didn't work. In
