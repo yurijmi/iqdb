@@ -2,7 +2,7 @@
 #----------------------------
 
 # Any extra options you need
-CFLAGS=-I/usr/local/Cellar/libpng12/1.2.50/include -L/usr/local/Cellar/libpng12/1.2.50/lib
+CFLAGS=-I/usr/include/GraphicsMagick -Wall -g -fno-strict-aliasing -O2 -pthread -L/usr/lib -L/usr/lib/X11 -L/usr/lib -L/usr/lib -lGraphicsMagick++ -lGraphicsMagick -ljbig -llcms2 -ltiff -lfreetype -ljasper -ljpeg -lpng12 -lwmflite -lXext -lSM -lICE -lX11 -llzma -lbz2 -lxml2 -lz -lm -lgomp -lpthread
 EXTRADEFS=
 
 # Graphics library to use, can be GD or ImageMagick.
