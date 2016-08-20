@@ -41,6 +41,10 @@
 #include <algorithm>
 #include <list>
 #include <vector>
+#include <cstdio>
+#include <cstring>
+#include <cstdlib>
+#include <cmath>
 
 #include "auto_clean.h"
 #define DEBUG_IQDB
@@ -195,7 +199,7 @@ void dupe_map::link(imageId one, imageId two) {
 	if (one == two) return;
 ///	if (one > two) std::swap(one, two);
 
-	DEBUG(dupe_finder)("\nLinking %08"FMT_imageId" -> %08"FMT_imageId": ", one, two);
+	DEBUG(dupe_finder)("\nLinking %08" FMT_imageId " -> %08" FMT_imageId ": ", one, two);
 	iterator itrOne = find(one);
 	iterator itrTwo = find(two);
 	if (itrOne == end()) {
@@ -225,7 +229,7 @@ void dupe_map::link(imageId one, imageId two) {
 */
 
 	} else if (itrTwo == end()) {
-		DEBUG_CONT(dupe_finder)(DEBUG_OUT, "inserting in group %p of %08"FMT_imageId".\n", itrOne->second, one);
+		DEBUG_CONT(dupe_finder)(DEBUG_OUT, "inserting in group %p of %08" FMT_imageId ".\n", itrOne->second, one);
 		if (itrOne->second->empty()) throw imgdb::internal_error("Group is empty!");
 		insert(two, itrOne->second);
 		return;
@@ -239,12 +243,12 @@ void dupe_map::link(imageId one, imageId two) {
 	// Both exist in different groups. Merge groups.
 	dupe_list* gfrom = itrTwo->second;
 	dupe_list* gto = itrOne->second;
-	DEBUG_CONT(dupe_finder)(DEBUG_OUT, "merging group %p of %08"FMT_imageId" into %p of %08"FMT_imageId"...", gfrom, two, gto, one);
+	DEBUG_CONT(dupe_finder)(DEBUG_OUT, "merging group %p of %08" FMT_imageId " into %p of %08" FMT_imageId "...", gfrom, two, gto, one);
 	if (gfrom->empty() || gto->empty()) throw imgdb::internal_error("Group is empty!");
 
 	for (dupe_list::iterator lItr = gfrom->begin(); lItr != gfrom->end(); ++lItr) {
 		iterator itr = find(*lItr);
-		DEBUG_CONT(dupe_finder)(DEBUG_OUT, " %08"FMT_imageId"(%p->%p)", *lItr, itr == end() ? NULL : itr->second, gto);
+		DEBUG_CONT(dupe_finder)(DEBUG_OUT, " %08" FMT_imageId "(%p->%p)", *lItr, itr == end() ? NULL : itr->second, gto);
 		if (itr == end()) throw imgdb::internal_error("Dupe link not found!");
 		itr->second = gto;
 	}
@@ -329,7 +333,7 @@ fprintf(stderr, "Min score: %.1f\n", ScD(m));
 		out_list out;
 		DEBUG(dupe_finder)("Processing group %p: ", &*itr);
 		for (dupe_list::const_iterator dItr = itr->begin(); dItr != itr->end(); ++dItr) {
-			DEBUG(dupe_finder)(" %08"FMT_imageId, *dItr);
+			DEBUG(dupe_finder)(" %08" FMT_imageId, *dItr);
 			out.push_back(*dItr);
 			dupe_map::iterator mItr = dupes.find(*dItr);
 			if (mItr == dupes.end()) throw imgdb::internal_error("Could not find linked dupe.");
@@ -363,12 +367,12 @@ fprintf(stderr, "Min score: %.1f\n", ScD(m));
 
 	for (lists_list::reverse_iterator itr = lists.rbegin(); itr != lists.rend(); ++itr) {
 		//fprintf(stderr, "\nPrinting: %08lx", ref);
-		printf("202 %08"FMT_imageId"=%.1f", itr->second.first, 0.0);
+		printf("202 %08" FMT_imageId "=%.1f", itr->second.first, 0.0);
 		//fprintf(stderr, "Showing group %p with similarity %.2f\n", &itr->second.second, itr->first);
 		while (!itr->second.second.empty()) {
 			//imgdb::Score score = db->calcSim(itr->second.second.front().id, itr->second.first, false);
 			//fprintf(stderr, " %08lx<->%08lx:%.1f", out.front().id, ref, ScD(score));
-			printf(" %08"FMT_imageId":%.1f",itr->second.second.front().id, ScD(itr->second.second.front().score));
+			printf(" %08" FMT_imageId ":%.1f",itr->second.second.front().id, ScD(itr->second.second.front().score));
 			std::pop_heap(itr->second.second.begin(), itr->second.second.end());
 			itr->second.second.pop_back();
 		}
@@ -389,14 +393,14 @@ void add(const char* fn) {
 			DEBUG(errors)("Read error.\n");
 			continue;
 		}
-		if (sscanf(line, "%"FMT_imageId" %d %d:%1023[^\r\n]\n", &id, &width, &height, fn) != 4  &&
-		    sscanf(line, "%"FMT_imageId":%1023[^\r\n]\n", &id, fn) != 2) {
+		if (sscanf(line, "%" FMT_imageId " %d %d:%1023[^\r\n]\n", &id, &width, &height, fn) != 4  &&
+		    sscanf(line, "%" FMT_imageId ":%1023[^\r\n]\n", &id, fn) != 2) {
 			DEBUG(errors)("Invalid line %s\n", line);
 			continue;
 		}
 		try {
 			if (!db->hasImage(id)) {
-				DEBUG(images)("Adding %s = %08"FMT_imageId"...\r", fn, id);
+				DEBUG(images)("Adding %s = %08" FMT_imageId "...\r", fn, id);
 				db->addImage(id, fn);
 			}
 			if (width != -1 && height != -1)
@@ -411,7 +415,7 @@ void add(const char* fn) {
 void list(const char* fn) {
 	dbSpaceAuto db(fn, imgdb::dbSpace::mode_simple);
 	imgdb::imageId_list list = db->getImgIdList();
-	for (imgdb::imageId_list::iterator itr = list.begin(); itr != list.end(); ++itr) printf("%08"FMT_imageId"\n", *itr);
+	for (imgdb::imageId_list::iterator itr = list.begin(); itr != list.end(); ++itr) printf("%08" FMT_imageId "\n", *itr);
 }
 
 void rehash(const char* fn) {
@@ -438,23 +442,23 @@ void query(const char* fn, const char* img, int numres, int flags) {
 	dbSpaceAuto db(fn, imgdb::dbSpace::mode_simple);
 	imgdb::sim_vector sim = db->queryImg(imgdb::queryArg(img, numres, flags));
 	for (size_t i = 0; i < sim.size(); i++)
-		printf("%08"FMT_imageId" %lf %d %d\n", sim[i].id, (double)sim[i].score / imgdb::ScoreMax, sim[i].width, sim[i].height);
+		printf("%08" FMT_imageId " %lf %d %d\n", sim[i].id, (double)sim[i].score / imgdb::ScoreMax, sim[i].width, sim[i].height);
 }
 
 void diff(const char* fn, imgdb::imageId id1, imgdb::imageId id2) {
 	dbSpaceAuto db(fn, imgdb::dbSpace::mode_readonly);
 	double diff = db->calcDiff(id1, id2);
-	printf("%08"FMT_imageId" %08"FMT_imageId" %lf\n", id1, id2, diff);
+	printf("%08" FMT_imageId " %08" FMT_imageId " %lf\n", id1, id2, diff);
 }
 
 void sim(const char* fn, imgdb::imageId id, int numres) {
 	dbSpaceAuto db(fn, imgdb::dbSpace::mode_readonly);
 	imgdb::sim_vector sim = db->queryImg(imgdb::queryArg(db, id, numres, 0));
 	for (size_t i = 0; i < sim.size(); i++)
-		printf("%08"FMT_imageId" %lf %d %d\n", sim[i].id, (double)sim[i].score / imgdb::ScoreMax, sim[i].width, sim[i].height);
+		printf("%08" FMT_imageId " %lf %d %d\n", sim[i].id, (double)sim[i].score / imgdb::ScoreMax, sim[i].width, sim[i].height);
 }
 
-enum event_t { DO_QUITANDSAVE };
+enum event_t { DO_QUITANDSAVE=0, DO_ERROR, DO_DONE };
 
 #define DB dbs.at(dbid)
 
@@ -476,7 +480,7 @@ std::pair<char*, size_t> read_blob(const char* size_arg, FILE* rd) {
 	return std::make_pair(blob, blob_size);
 }
 
-void do_commands(FILE* rd, FILE* wr, dbSpaceAutoMap& dbs, bool allow_maint) {
+event_t do_commands(FILE* rd, FILE* wr, dbSpaceAutoMap& dbs, bool allow_maint) {
 	struct customOpt : public imgdb::queryOpt {
 		customOpt() : mindev(0) {}
 
@@ -492,11 +496,11 @@ void do_commands(FILE* rd, FILE* wr, dbSpaceAutoMap& dbs, bool allow_maint) {
 			if (feof(rd)) {
 				fprintf(wr, "100 EOF detected.\n");
 				DEBUG(warnings)("End of input\n");
-				return;
+				return DO_ERROR;
 			} else if (ferror(rd)) {
 				fprintf(wr, "300 File error %s\n", strerror(errno));
 				DEBUG(errors)("File error %s\n", strerror(errno));
-				return;
+				return DO_ERROR;
 			} else {
 				fprintf(wr, "300 Unknown file error.\n");
 				DEBUG(warnings)("Unknown file error.\n");
@@ -525,16 +529,16 @@ void do_commands(FILE* rd, FILE* wr, dbSpaceAutoMap& dbs, bool allow_maint) {
 			if (!allow_maint) throw imgdb::usage_error("Not authorized");
 			fprintf(wr, "100 Done.\n");
 			fflush(wr);
-			throw DO_QUITANDSAVE;
+			return DO_QUITANDSAVE;
 
 		} else if (!strcmp(command, "done")) {
-			return;
+			return DO_DONE;
 
 		} else if (!strcmp(command, "list")) {
 			int dbid;
 			if (sscanf(arg, "%i\n", &dbid) != 1) throw imgdb::param_error("Format: list <dbid>");
 			imgdb::imageId_list list = DB->getImgIdList();
-			for (size_t i = 0; i < list.size(); i++) fprintf(wr, "100 %08"FMT_imageId"\n", list[i]);
+			for (size_t i = 0; i < list.size(); i++) fprintf(wr, "100 %08" FMT_imageId "\n", list[i]);
 
 		} else if (!strcmp(command, "count")) {
 			int dbid;
@@ -569,7 +573,7 @@ void do_commands(FILE* rd, FILE* wr, dbSpaceAutoMap& dbs, bool allow_maint) {
 				stddev_limit(sim, queryOpt.mindev);
 			fprintf(wr, "101 matches=%zd\n", sim.size());
 			for (size_t i = 0; i < sim.size(); i++)
-				fprintf(wr, "200 %08"FMT_imageId" %lf %d %d\n", sim[i].id, (double)sim[i].score / imgdb::ScoreMax, sim[i].width, sim[i].height);
+				fprintf(wr, "200 %08" FMT_imageId " %lf %d %d\n", sim[i].id, (double)sim[i].score / imgdb::ScoreMax, sim[i].width, sim[i].height);
 
 			queryOpt.reset();
 
@@ -633,14 +637,14 @@ void do_commands(FILE* rd, FILE* wr, dbSpaceAutoMap& dbs, bool allow_maint) {
 				stddev_limit(sim, queryOpt.mindev);
 			fprintf(wr, "101 matches=%zd\n", sim.size());
 			for (size_t i = 0; i < sim.size(); i++)
-				fprintf(wr, "201 %d %08"FMT_imageId" %lf %d %d\n", sim[i].db, sim[i].id, (double)((slope * sim[i].score >> imgdb::ScoreScale) + merge_min) / imgdb::ScoreMax, sim[i].width, sim[i].height);
+				fprintf(wr, "201 %d %08" FMT_imageId " %lf %d %d\n", sim[i].db, sim[i].id, (double)((slope * sim[i].score >> imgdb::ScoreScale) + merge_min) / imgdb::ScoreMax, sim[i].width, sim[i].height);
 
 			queryOpt.reset();
 
 		} else if (!strcmp(command, "sim")) {
 			int dbid, flags, numres;
 			imgdb::imageId id;
-			if (sscanf(arg, "%i %i %i %"FMT_imageId"\n", &dbid, &flags, &numres, &id) != 4)
+			if (sscanf(arg, "%i %i %i %" FMT_imageId "\n", &dbid, &flags, &numres, &id) != 4)
 				throw imgdb::param_error("Format: sim <dbid> <flags> <numres> <imageId>");
 
 			imgdb::sim_vector sim = DB->queryImg(imgdb::queryArg(DB, id, numres, flags).coalesce(queryOpt));
@@ -648,7 +652,7 @@ void do_commands(FILE* rd, FILE* wr, dbSpaceAutoMap& dbs, bool allow_maint) {
 				stddev_limit(sim, queryOpt.mindev);
 			fprintf(wr, "101 matches=%zd\n", sim.size());
 			for (size_t i = 0; i < sim.size(); i++)
-				fprintf(wr, "200 %08"FMT_imageId" %lf %d %d\n", sim[i].id, (double)sim[i].score / imgdb::ScoreMax, sim[i].width, sim[i].height);
+				fprintf(wr, "200 %08" FMT_imageId " %lf %d %d\n", sim[i].id, (double)sim[i].score / imgdb::ScoreMax, sim[i].width, sim[i].height);
 
 			queryOpt.reset();
 
@@ -657,13 +661,13 @@ void do_commands(FILE* rd, FILE* wr, dbSpaceAutoMap& dbs, bool allow_maint) {
 			imgdb::imageId id;
 			int dbid;
 			int width = -1, height = -1;
-			if (sscanf(arg, "%d %"FMT_imageId" %d %d:%1023[^\r\n]\n", &dbid, &id, &width, &height, fn) != 5  &&
-			    sscanf(arg, "%d %"FMT_imageId":%1023[^\r\n]\n", &dbid, &id, fn) != 3)
+			if (sscanf(arg, "%d %" FMT_imageId " %d %d:%1023[^\r\n]\n", &dbid, &id, &width, &height, fn) != 5  &&
+			    sscanf(arg, "%d %" FMT_imageId ":%1023[^\r\n]\n", &dbid, &id, fn) != 3)
 				throw imgdb::param_error("Format: add <dbid> <imgid>[ <width> <height>]:<filename>");
 
 			// Could just catch imgdb::param_error, but this is so common here that handling it explicitly is better.
 			if (!DB->hasImage(id)) {
-				fprintf(wr, "100 Adding %s = %d:%08"FMT_imageId"...\n", fn, dbid, id);
+				fprintf(wr, "100 Adding %s = %d:%08" FMT_imageId "...\n", fn, dbid, id);
 				DB->addImage(id, fn);
 			}
 
@@ -673,19 +677,19 @@ void do_commands(FILE* rd, FILE* wr, dbSpaceAutoMap& dbs, bool allow_maint) {
 		} else if (!strcmp(command, "remove")) {
 			imgdb::imageId id;
 			int dbid;
-			if (sscanf(arg, "%d %"FMT_imageId, &dbid, &id) != 2)
+			if (sscanf(arg, "%d %" FMT_imageId, &dbid, &id) != 2)
 				throw imgdb::param_error("Format: remove <dbid> <imgid>");
 
-			fprintf(wr, "100 Removing %d:%08"FMT_imageId"...\n", dbid, id);
+			fprintf(wr, "100 Removing %d:%08" FMT_imageId "...\n", dbid, id);
 			DB->removeImage(id);
 
 		} else if (!strcmp(command, "set_res")) {
 			imgdb::imageId id;
 			int dbid, width, height;
-			if (sscanf(arg, "%d %"FMT_imageId" %d %d\n", &dbid, &id, &width, &height) != 4)
+			if (sscanf(arg, "%d %" FMT_imageId " %d %d\n", &dbid, &id, &width, &height) != 4)
 				throw imgdb::param_error("Format: set_res <dbid> <imgid> <width> <height>");
 
-			fprintf(wr, "100 Setting %d:%08"FMT_imageId" = %d:%d...\r", dbid, id, width, height);
+			fprintf(wr, "100 Setting %d:%08" FMT_imageId " = %d:%d...\r", dbid, id, width, height);
 			DB->setImageRes(id, width, height);
 
 		} else if (!strcmp(command, "list_info")) {
@@ -693,7 +697,7 @@ void do_commands(FILE* rd, FILE* wr, dbSpaceAutoMap& dbs, bool allow_maint) {
 			if (sscanf(arg, "%i\n", &dbid) != 1) throw imgdb::param_error("Format: list_info <dbid>");
 			imgdb::image_info_list list = DB->getImgInfoList();
 			for (imgdb::image_info_list::iterator itr = list.begin(); itr != list.end(); ++itr)
-				fprintf(wr, "100 %08"FMT_imageId" %d %d\n", itr->id, itr->width, itr->height);
+				fprintf(wr, "100 %08" FMT_imageId " %d %d\n", itr->id, itr->width, itr->height);
 
 		} else if (!strcmp(command, "rehash")) {
 			if (!allow_maint) throw imgdb::usage_error("Not authorized");
@@ -778,16 +782,15 @@ void do_commands(FILE* rd, FILE* wr, dbSpaceAutoMap& dbs, bool allow_maint) {
 		fprintf(wr, "301 %s %s\n", err.type(), err.what());
 		fflush(wr);
 	}
+
+	return DO_DONE;
 }
 
 void command(int numfiles, char** files) {
 	dbSpaceAutoMap dbs(numfiles, imgdb::dbSpace::mode_alter, files);
 
-	try {
-		do_commands(stdin, stdout, dbs, true);
-
-	} catch (const event_t& event) {
-		if (event != DO_QUITANDSAVE) return;
+	int ret = do_commands(stdin, stdout, dbs, true);
+	if (ret == DO_QUITANDSAVE) {
 		for (int dbid = 0; dbid < numfiles; dbid++)
 			DB.save();
 	}
@@ -973,10 +976,10 @@ void server(const char* hostport, int numfiles, char** files, bool listen2) {
 		socket_stream stream(fd);
 
 		try {
-			do_commands(stream.rd, stream.wr, dbs, is_high);
-
-		} catch (const event_t& event) {
-			if (event == DO_QUITANDSAVE) return;
+			int ret = do_commands(stream.rd, stream.wr, dbs, is_high);
+			if (ret == DO_QUITANDSAVE) {
+				return;
+			}
 
 		// Unhandled imgdb::base_error means it was fatal or completely unknown.
 		} catch (const imgdb::base_error& err) {
