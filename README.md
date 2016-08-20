@@ -7,9 +7,8 @@ see the file COPYING for details.
 ## Compiling
 
 ```
-sudo apt-get install libgd-dev
+sudo apt-get install libgd2-xpm-dev libpng-dev libjpeg-dev libmagick-dev
 make
-make install
 ```
 
 ## Running
