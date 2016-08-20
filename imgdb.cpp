@@ -124,7 +124,6 @@ int tempfile() {
 template<bool is_simple>
 int imageIdIndex_list<is_simple, false>::m_fd = -1;
 
-template<>
 template<bool is_simple>
 void imageIdIndex_list<is_simple, false>::resize(size_t s) {
 	if (!is_simple) s = (s + pageImgMask) & ~pageImgMask;
@@ -799,7 +798,7 @@ void dbSpaceImpl<is_simple>::load(const char* filename) {
 
 	count_t numImg = FLIPPED(f.read_size<count_t>(size_count));
 	offset_t firstOff = FLIPPED(f.read_size<offset_t>(size_offset));
-	DEBUG_CONT(imgdb)(DEBUG_OUT, "has %"FMT_count_t" images at %llx. ", numImg, (long long)firstOff);
+	DEBUG_CONT(imgdb)(DEBUG_OUT, "has %" FMT_count_t " images at %llx. ", numImg, (long long)firstOff);
 
 	// read bucket sizes and reserve space so that buckets do not
 	// waste memory due to exponential growth of std::vector
@@ -916,7 +915,7 @@ void dbSpaceAlter::load(const char* filename) {
 		count_t numImg = FLIPPED(m_f->read<count_t>());
 		m_sigOff = FLIPPED(m_f->read<offset_t>());
 
-		DEBUG_CONT(imgdb)(DEBUG_OUT, "has %"FMT_count_t" images. ", numImg);
+		DEBUG_CONT(imgdb)(DEBUG_OUT, "has %" FMT_count_t " images. ", numImg);
 		// read bucket sizes
 		for (buckets_t::iterator itr = m_buckets.begin(); itr != m_buckets.end(); ++itr)
 			itr->size = FLIPPED(m_f->read<count_t>());
@@ -1674,7 +1673,7 @@ stats_t dbSpaceImpl<is_simple>::getCoeffStats() {
 	ret.reserve(imgbuckets.count());
 
 #ifdef DEBUG_STATS
-	typedef std::tr1::unordered_map<int, size_t> deltas_t;
+	typedef std::unordered_map<int, size_t> deltas_t;
 	deltas_t deltas;
 	size_t total = 0, b4 = 0, b70 = 0, b16k = 0, a16k = 0, b255 = 0;
 #endif
